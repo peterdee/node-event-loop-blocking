@@ -22,9 +22,15 @@ while (!flag) {
   if (counter % 1000000000 === 0) {
     console.log('> blocked @', counter);
 
-    exec('node exec.js');
+    exec('node exec.js', (error, stdout, stderr) => console.log('> execed', error, stdout, stderr));
+
     fork(`${process.cwd()}/fork.js`);
-    spawn('node', ['spawn.js']);
+
+    const spawned = spawn('node', ['spawn.js']);
+    spawned.stdout.on('data', (data) => console.log('> spawned data:', data));
+    spawned.on('error', (error) => console.log('> spawned error:', error));
+    spawned.on('close', () => console.log('> spawned closed'));
+    spawned.on('exit', (code) => console.log('> spawned exited', code));
   }
 }
 
